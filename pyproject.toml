@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "pulumi-flexi"
+version = "0.1.0"
+description = ""
+authors = ["Iain-S <25081046+Iain-S@users.noreply.github.com >"]
+readme = "README.md"
+packages = [{include = "pulumi_flexi"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pulumi-azure-native = "^1.103.0"
+pulumi-postgresql = "^3.8.0"
+pulumi = "^3.70.0"
+pulumi-random = "^4.13.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
