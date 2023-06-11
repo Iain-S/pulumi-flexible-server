@@ -4,7 +4,6 @@ version = "0.1.0"
 description = ""
 authors = ["Iain-S <25081046+Iain-S@users.noreply.github.com >"]
 readme = "README.md"
-packages = [{include = "pulumi_flexi"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
