@@ -1,2 +1,4 @@
 config:
-  azure-native:location: UKSouth
+  pulumi_flexi:MY_IP:
+    secure: AAABADvB95PdfWG9LSljibnMKQ2A1tvEoXTSoS4JlfmB7nh4v8WaPcQ6rc50/A==
+  pulumi_flexi:SINGLE_OR_FLEXI: FLEXI
