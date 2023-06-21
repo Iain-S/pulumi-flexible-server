@@ -1,9 +1,11 @@
 """Pulumi script for creating a Function App (and dependencies) on Azure."""
 import pulumi
 import pulumi_random
+from pathlib import Path
 from pulumi import ResourceOptions, Output
 from pulumi_azure_native import resources
 from pulumi_postgresql import Provider, ProviderArgs, Role, RoleArgs
+from typing import Optional
 
 import pulumi_azure_native.dbforpostgresql.v20221201 as flexi_server
 import pulumi_azure_native.dbforpostgresql as single_server
@@ -19,6 +21,18 @@ assert SINGLE_OR_FLEXI in ("SINGLE", "FLEXI"), "Expected SINGLE or FLEXI"
 
 # E.g. ask Google for your IP
 MY_IP = config.require_secret("MY_IP")
+
+# Download from the link below and set as /local/path/to/DigiCertGlobalRootCA.crt.pem
+# https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-connect-tls-ssl#applications-that-require-certificate-verification-for-tlsssl-connectivity
+DB_ROOT_CERT_PATH = config.get_secret("DB_ROOT_CERT_PATH")
+
+def assert_is_file(filepath: Optional[str]) -> Optional[str]:
+    """If filepath is not None, make sure it is a valid file path."""
+    if filepath:
+        assert Path(filepath).is_file()
+    return filepath
+
+DB_ROOT_CERT_PATH.apply(assert_is_file)
 
 DB_ADMIN_USERNAME = "honeybadger"
 
@@ -42,7 +56,7 @@ if SINGLE_OR_FLEXI == "FLEXI":
         flexi_server.ServerArgs(
             resource_group_name=resource_group.name,
             location=resource_group.location,
-            server_name=f"{SINGLE_OR_FLEXI.lower()}-server-8765",
+            server_name=f"{SINGLE_OR_FLEXI.lower()}-server-876",
             version=flexi_server.ServerVersion.SERVER_VERSION_11,
             create_mode="Default",
             administrator_login=DB_ADMIN_USERNAME,
@@ -129,10 +143,11 @@ provider = Provider(
     f"{STACK_NAME}-provider",
     ProviderArgs(
         host=server.fully_qualified_domain_name,
-        username=admin_full_username,
+        username=admin_full_username if SINGLE_OR_FLEXI == "SINGLE" else DB_ADMIN_USERNAME,
         password=password.result,
         superuser=False,
-        sslmode="require",
+        sslmode="verify-full",
+        sslrootcert=DB_ROOT_CERT_PATH
     ),
     # The provider seems to need to access the server
     opts=ResourceOptions(depends_on=firewall_rule),
